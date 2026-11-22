@@ -1,0 +1,69 @@
+name: Folder Scan tests and Docker image
+
+on:
+  push:
+    branches:
+      - feature/folder-scan
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: folder-scan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Validate Folder Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JSON
+        run: jq -e . config.example.json > /dev/null
+      - name: Check PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          foreach ($file in @('Posterizarr.ps1', 'modules/core/Variables.ps1', 'modules/functions/System.ps1', 'modules/functions/FolderScan.ps1', 'modules/modes/FolderScanMode.ps1', 'tests/FolderScan.Smoke.ps1')) {
+            $tokens = $null
+            $parseErrors = $null
+            $filePath = (Resolve-Path -LiteralPath $file).Path
+            [void][System.Management.Automation.Language.Parser]::ParseFile($filePath, [ref]$tokens, [ref]$parseErrors)
+            if (@($parseErrors).Count -gt 0) {
+              Write-Error "Syntax errors in ${file}: $($parseErrors -join '; ')" -ErrorAction Continue
+              $failed = $true
+            }
+          }
+          if ($failed) { exit 1 }
+      - name: Run Folder Scan smoke tests
+        shell: pwsh
+        run: pwsh -NoProfile -File tests/FolderScan.Smoke.ps1
+
+  docker:
+    name: Build linux/amd64 Docker image
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Sign in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and publish development image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ghcr.io/vanvietit-star/posterizarr-fs:dev
+          build-args: |
+            VENDOR=vanvietit-star
+            VERSION=4.0.1-fs
