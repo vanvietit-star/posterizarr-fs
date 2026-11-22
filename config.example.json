@@ -1,4 +1,8 @@
 {
+  "FolderScan": {
+    "MovieRoots": [],
+    "ShowRoots": []
+  },
   "WebUI": {
     "basicAuthEnabled": false,
     "basicAuthUsername": "admin",
