@@ -136,8 +136,8 @@ VOLUME ["/config"]
 ARG VERSION
 
 # Labels
-LABEL org.opencontainers.image.source="https://github.com/fscorrupt/posterizarr"
-LABEL org.opencontainers.image.description="Posterizarr - Automated poster generation with integrated Web UI"
+LABEL org.opencontainers.image.source="https://github.com/vanvietit-star/posterizarr-fs"
+LABEL org.opencontainers.image.description="Unofficial Posterizarr FS fork - Folder Scan mode and original artwork features"
 LABEL org.opencontainers.image.licenses="GPL-3.0"
 LABEL org.opencontainers.image.version=$VERSION
 
