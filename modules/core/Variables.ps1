@@ -152,6 +152,10 @@ if ($global:ConfigOverride -and (Test-Path $global:ConfigOverride)) {
     $config = Get-Content -Raw -Path $(Join-Path $global:ScriptRoot 'config.json') | ConvertFrom-Json
 }
 
+# FolderScan paths are container paths, not media-server paths.
+$FolderScanMovieRoots = @($config.FolderScan.MovieRoots | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+$FolderScanShowRoots  = @($config.FolderScan.ShowRoots  | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+
 # Replace Script with Latest
 if ($Platform -ne 'Docker' -and "$($config.PrerequisitePart.AutoUpdatePosterizarr)".ToLower() -eq 'true' -and $CurrentScriptVersion -ne $LatestScriptVersion) {
     Write-Entry -Subtext "Posterizarr version upgrade started..." -Path $global:configLogging -Color White -log Info
