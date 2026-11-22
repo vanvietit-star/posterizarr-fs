@@ -1381,6 +1381,7 @@ function CheckJson {
 
         # Remove keys from config that are no longer in the default config
         foreach ($existingKey in $config.PSObject.Properties.Name) {
+            if ($existingKey -eq 'FolderScan') { continue } # Fork-local config absent from upstream schema
             if (-not $defaultConfig.PSObject.Properties.Name.Contains($existingKey)) {
                 Write-Entry -Message "Removing obsolete Main Attribute from your Config file: $existingKey." -Path $global:configLogging -Color Yellow -log Warning
                 $config.PSObject.Properties.Remove($existingKey)
