@@ -1,5 +1,6 @@
 param (
     [switch]$GatherLogs, # Required for Gather Logs trigger
+    [switch]$FolderScan, # Read local NFOs and generate movie/series posters
     [switch]$Manual, # Required for Manual trigger
     [switch]$Testing, # Required for Testing trigger
     [switch]$Tautulli, # Required for Tautulli trigger
@@ -77,7 +78,7 @@ for ($i = 0; $i -lt $ExtraArgs.Count; $i++) {
     }
 }
 
-$CurrentScriptVersion = "4.0.0"
+$CurrentScriptVersion = "4.0.1"
 $global:HeaderWritten = $false
 $ProgressPreference = 'SilentlyContinue'
 
@@ -144,7 +145,10 @@ if ($global:ExitRequested) { exit }
 $global:AppRoot = $PSScriptRoot
 
 #### MAIN SCRIPT START ####
-if ($Manual) {
+if ($FolderScan) {
+    . "$PSScriptRoot\modules\modes\FolderScanMode.ps1"
+}
+elseif ($Manual) {
     . "$PSScriptRoot\modules\modes\ManualMode.ps1"
 }
 elseif ($Testing) {
